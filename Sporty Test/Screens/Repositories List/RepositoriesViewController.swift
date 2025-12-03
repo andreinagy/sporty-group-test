@@ -8,11 +8,16 @@ import UIKit
 final class RepositoriesViewController: UITableViewController {
     private let gitHubAPI: GitHubAPI
     private let mockLiveServer: MockLiveServer
-    private var repositories: [GitHubMinimalRepository] = []
+    private let viewModel: RepositoriesViewControllerViewModel
+    private var cancellables = Set<AnyCancellable>()
 
     init(gitHubAPI: GitHubAPI, mockLiveServer: MockLiveServer) {
         self.gitHubAPI = gitHubAPI
         self.mockLiveServer = mockLiveServer
+        self.viewModel = RepositoriesViewControllerViewModel(
+            gitHubAPI: gitHubAPI,
+            mockLiveServer: mockLiveServer
+        )
 
         super.init(style: .insetGrouped)
 
@@ -33,6 +38,24 @@ final class RepositoriesViewController: UITableViewController {
         refreshControl.addTarget(self, action: #selector(refreshControlValueChanged), for: .valueChanged)
         tableView.refreshControl = refreshControl
         
+        viewModel.$repositories
+            .sink { [weak self] _ in
+                DispatchQueue.main.async {
+                    self?.tableView.reloadData()
+                }
+            }
+            .store(in: &cancellables)
+        
+        viewModel.$isLoading
+            .sink { [weak self] isLoading in
+                if isLoading {
+                    self?.tableView.refreshControl?.beginRefreshing()
+                } else {
+                    self?.tableView.refreshControl?.endRefreshing()
+                }
+            }
+            .store(in: &cancellables)
+        
         awaitLoadRepositories()
     }
 
@@ -41,11 +64,11 @@ final class RepositoriesViewController: UITableViewController {
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        repositories.count
+        viewModel.repositories.count
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let repository = repositories[indexPath.row]
+        let repository = viewModel.repositories[indexPath.row]
         let cell = tableView.dequeueReusableCell(withIdentifier: "RepositoryCell", for: indexPath) as! RepositoryTableViewCell
 
         cell.name = repository.name
@@ -70,7 +93,7 @@ final class RepositoriesViewController: UITableViewController {
     }
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let repository = repositories[indexPath.row]
+        let repository = viewModel.repositories[indexPath.row]
         let viewController = RepositoryViewController(
             minimalRepository: repository,
             gitHubAPI: gitHubAPI,
@@ -79,20 +102,9 @@ final class RepositoriesViewController: UITableViewController {
         show(viewController, sender: self)
     }
 
-    private func loadRepositories() async {
-        do {
-            let api = GitHubAPI()
-            repositories = try await api.repositoriesForOrganisation("swiftlang")
-            tableView.reloadData()
-        } catch {
-            print("Error loading repositories: \(error)")
-        }
-        tableView.refreshControl?.endRefreshing()
-    }
-
     private func awaitLoadRepositories() {
         Task {
-            await loadRepositories()
+            await viewModel.loadRepositories()
         }
     }
     

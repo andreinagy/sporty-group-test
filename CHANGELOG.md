@@ -13,3 +13,5 @@ G: Implement real-time updates of the star count using the provided `MockLiveSer
 - Added live uptates to the cell.
 - Added live updates to the repo details view.
 
+C: Refactor the `ReposViewController` to use an architecture of your choosing.
+- Copilot assisted refactor to MVVM followed by manual cleanup.
