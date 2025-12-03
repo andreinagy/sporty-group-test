@@ -27,3 +27,9 @@ A: Add UI to store the authorisation token used to access the GitHub API.
 - Added GithubAPIWrapper. I suppose this is a 3rd party library which I can't edit and we need to work around it's limitations until they provide a fixed version.
     - The working assumption is that there is no issue with using the GithubAPI models.
 - GithubAPIWrapper and KeychainWrapper could be absttracted wtih protocols if it would be useful to unit test code relying on them.
+
+F: Modify `RepositoryTableViewCell` to modify its layout when the title and star count cannot fit on a single line.
+- I think the purpose of the test is more than just allow multiple lines in the title label, in real projects I would advise against doing conditional layout because of aestetic integrity.
+- For the purpose of showing constraints manipulation, I think the cases would be stars inline with the text and stars under the text.
+- Moved the name, stars image and stars text to a separate view so it can be easier to maintain.
+- Implemented with Copilot boilerplate and manual adaptation.

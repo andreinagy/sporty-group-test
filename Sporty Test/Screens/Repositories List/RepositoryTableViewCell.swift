@@ -9,10 +9,10 @@ final class RepositoryTableViewCell: UITableViewCell {
     /// The name of the repository.
     var name: String? {
         get {
-            nameLabel.text
+            nameAndStarsView.name
         }
         set {
-            nameLabel.text = newValue
+            nameAndStarsView.name = newValue
         }
     }
 
@@ -29,21 +29,14 @@ final class RepositoryTableViewCell: UITableViewCell {
     /// The star count of the repository. This text should be pre-formatted.
     var starCountText: String? {
         get {
-            starCountLabel.text
+            nameAndStarsView.starCountText
         }
         set {
-            starCountLabel.text = newValue
+            nameAndStarsView.starCountText = newValue
         }
     }
 
-    private let nameLabel: UILabel = {
-        let label = UILabel()
-        let baseFont = UIFont.preferredFont(forTextStyle: .body)
-        let boldDescriptor = baseFont.fontDescriptor.withSymbolicTraits(.traitBold)
-        label.font = boldDescriptor.flatMap { UIFont(descriptor: $0, size: 0) } ?? baseFont
-        label.adjustsFontForContentSizeCategory = true
-        return label
-    }()
+    private let nameAndStarsView = RepositoryTableViewCellNameStarsView()
 
     private let descriptionLabel: UILabel = {
         let label = UILabel()
@@ -54,59 +47,22 @@ final class RepositoryTableViewCell: UITableViewCell {
         return label
     }()
 
-    private let starImageView: UIImageView = {
-        let imageView = UIImageView()
-        let configuration = UIImage.SymbolConfiguration(font: .preferredFont(forTextStyle: .caption1))
-        imageView.image = UIImage(systemName: "star.fill", withConfiguration: configuration)
-        imageView.tintColor = .systemYellow
-        return imageView
-    }()
-
-    private let starCountLabel: UILabel = {
-        let label = UILabel()
-        label.font = .monospacedSystemFont(ofSize: UIFont.preferredFont(forTextStyle: .caption1).pointSize, weight: .regular)
-        label.textColor = .secondaryLabel
-        label.adjustsFontForContentSizeCategory = true
-        return label
-    }()
-
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
 
-        starImageView.setContentCompressionResistancePriority(.required, for: .horizontal)
-        starCountLabel.setContentCompressionResistancePriority(.required, for: .horizontal)
-
-        contentView.addSubview(nameLabel)
-        contentView.addSubview(starImageView)
-        contentView.addSubview(starCountLabel)
+        contentView.addSubview(nameAndStarsView)
         contentView.addSubview(descriptionLabel)
 
-        nameLabel.translatesAutoresizingMaskIntoConstraints = false
-        starImageView.translatesAutoresizingMaskIntoConstraints = false
-        starCountLabel.translatesAutoresizingMaskIntoConstraints = false
+        nameAndStarsView.translatesAutoresizingMaskIntoConstraints = false
         descriptionLabel.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            nameLabel
+            nameAndStarsView
                 .leadingAnchor
                 .constraint(equalTo: contentView.layoutMarginsGuide.leadingAnchor),
-            nameLabel
-                .firstBaselineAnchor
+            nameAndStarsView
+                .topAnchor
                 .constraint(equalToSystemSpacingBelow: contentView.layoutMarginsGuide.topAnchor, multiplier: 1),
-
-            starImageView
-                .leadingAnchor
-                .constraint(equalToSystemSpacingAfter: nameLabel.trailingAnchor, multiplier: 1),
-            starImageView
-                .centerYAnchor
-                .constraint(equalTo: nameLabel.centerYAnchor),
-
-            starCountLabel
-                .leadingAnchor
-                .constraint(equalTo: starImageView.trailingAnchor, constant: 4),
-            starCountLabel
-                .centerYAnchor
-                .constraint(equalTo: nameLabel.centerYAnchor),
-            starCountLabel
+            nameAndStarsView
                 .trailingAnchor
                 .constraint(lessThanOrEqualTo: contentView.layoutMarginsGuide.trailingAnchor),
 
@@ -115,7 +71,7 @@ final class RepositoryTableViewCell: UITableViewCell {
                 .constraint(equalTo: contentView.layoutMarginsGuide.leadingAnchor),
             descriptionLabel
                 .firstBaselineAnchor
-                .constraint(equalToSystemSpacingBelow: nameLabel.lastBaselineAnchor, multiplier: 1),
+                .constraint(equalToSystemSpacingBelow: nameAndStarsView.bottomAnchor, multiplier: 1),
             descriptionLabel
                 .trailingAnchor
                 .constraint(equalTo: contentView.layoutMarginsGuide.trailingAnchor),
