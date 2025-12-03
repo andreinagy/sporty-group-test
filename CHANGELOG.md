@@ -15,3 +15,9 @@ G: Implement real-time updates of the star count using the provided `MockLiveSer
 
 C: Refactor the `ReposViewController` to use an architecture of your choosing.
 - Copilot assisted refactor to MVVM followed by manual cleanup.
+
+B: Add UI to request the repos for a different user.
+- Decided on a header view so it would scroll with the content as the the user views the list of repos.
+- Copilot generated initial files and manually adapted.
+- After testing, added an alert for errors and a red border on the organization textInput, so there is some UI feedback, and I didn't insist more on handling errors (eg. selective error for organization without repos).
+

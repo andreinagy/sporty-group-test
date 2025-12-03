@@ -7,10 +7,10 @@ final class RepositoriesViewControllerViewModel {
     @Published var repositories: [GitHubMinimalRepository] = []
     @Published var isLoading = false
     @Published var error: Error?
+    @Published var organization: String = "swiftlang"
 
     private let gitHubAPI: GitHubAPI
     private let mockLiveServer: MockLiveServer
-    private let organization: String
 
     init(
         gitHubAPI: GitHubAPI,
@@ -20,6 +20,10 @@ final class RepositoriesViewControllerViewModel {
         self.gitHubAPI = gitHubAPI
         self.mockLiveServer = mockLiveServer
         self.organization = organization
+    }
+
+    func setOrganization(_ org: String) {
+        organization = org
     }
 
     func loadRepositories() async {

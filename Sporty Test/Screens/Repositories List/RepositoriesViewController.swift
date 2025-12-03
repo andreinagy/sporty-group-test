@@ -10,6 +10,7 @@ final class RepositoriesViewController: UITableViewController {
     private let mockLiveServer: MockLiveServer
     private let viewModel: RepositoriesViewControllerViewModel
     private var cancellables = Set<AnyCancellable>()
+    private var headerView: RepositoriesHeaderView?
 
     init(gitHubAPI: GitHubAPI, mockLiveServer: MockLiveServer) {
         self.gitHubAPI = gitHubAPI
@@ -28,15 +29,13 @@ final class RepositoriesViewController: UITableViewController {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
         tableView.register(RepositoryTableViewCell.self, forCellReuseIdentifier: "RepositoryCell")
-
-        let refreshControl = UIRefreshControl()
-        refreshControl.addTarget(self, action: #selector(refreshControlValueChanged), for: .valueChanged)
-        tableView.refreshControl = refreshControl
+        setupRefreshControl()
+        setupOrganizationView()
         
         viewModel.$repositories
             .sink { [weak self] _ in
@@ -52,6 +51,25 @@ final class RepositoriesViewController: UITableViewController {
                     self?.tableView.refreshControl?.beginRefreshing()
                 } else {
                     self?.tableView.refreshControl?.endRefreshing()
+                }
+            }
+            .store(in: &cancellables)
+        
+        viewModel.$organization
+            .sink { [weak self] org in
+                DispatchQueue.main.async {
+                    self?.title = org
+                }
+            }
+            .store(in: &cancellables)
+        
+        viewModel.$error
+            .sink { [weak self] error in
+                DispatchQueue.main.async {
+                    self?.headerView?.setError(error != nil)
+                    if let error {
+                        self?.showErrorAlert(error)
+                    }
                 }
             }
             .store(in: &cancellables)
@@ -108,7 +126,34 @@ final class RepositoriesViewController: UITableViewController {
         }
     }
     
+    private func setupOrganizationView() {
+        let headerView = RepositoriesHeaderView(frame: CGRect(x: 0, y: 0, width: tableView.frame.width, height: 60))
+        self.headerView = headerView
+        headerView.setOrganization(viewModel.organization)
+        headerView.onGoTapped = { [weak self] organization in
+            self?.viewModel.setOrganization(organization)
+            self?.awaitLoadRepositories()
+        }
+        tableView.tableHeaderView = headerView
+    }
+    
+    private func setupRefreshControl() {
+        let refreshControl = UIRefreshControl()
+        refreshControl.addTarget(self, action: #selector(refreshControlValueChanged), for: .valueChanged)
+        tableView.refreshControl = refreshControl
+    }
+    
     @objc private func refreshControlValueChanged() {
         awaitLoadRepositories()
+    }
+    
+    private func showErrorAlert(_ error: Error) {
+        let alert = UIAlertController(
+            title: "Error",
+            message: error.localizedDescription,
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        present(alert, animated: true)
     }
 }
