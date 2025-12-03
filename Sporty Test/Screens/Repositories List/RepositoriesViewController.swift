@@ -29,9 +29,11 @@ final class RepositoriesViewController: UITableViewController {
 
         tableView.register(RepositoryTableViewCell.self, forCellReuseIdentifier: "RepositoryCell")
 
-        Task {
-            await loadRepositories()
-        }
+        let refreshControl = UIRefreshControl()
+        refreshControl.addTarget(self, action: #selector(refreshControlValueChanged), for: .valueChanged)
+        tableView.refreshControl = refreshControl
+        
+        awaitLoadRepositories()
     }
 
     override func numberOfSections(in tableView: UITableView) -> Int {
@@ -70,5 +72,16 @@ final class RepositoriesViewController: UITableViewController {
         } catch {
             print("Error loading repositories: \(error)")
         }
+        tableView.refreshControl?.endRefreshing()
+    }
+
+    private func awaitLoadRepositories() {
+        Task {
+            await loadRepositories()
+        }
+    }
+    
+    @objc private func refreshControlValueChanged() {
+        awaitLoadRepositories()
     }
 }
