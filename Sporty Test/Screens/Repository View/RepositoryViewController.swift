@@ -1,15 +1,19 @@
 import GitHubAPI
 import SwiftUI
 import UIKit
+import Combine
+import MockLiveServer
 
 /// A view controller that displays the details of a GitHub repository.
 final class RepositoryViewController: UIViewController {
     private let minimalRepository: GitHubMinimalRepository
     private let gitHubAPI: GitHubAPI
+    private let mockLiveServer: MockLiveServer
 
-    init(minimalRepository: GitHubMinimalRepository, gitHubAPI: GitHubAPI) {
+    init(minimalRepository: GitHubMinimalRepository, gitHubAPI: GitHubAPI, mockLiveServer: MockLiveServer) {
         self.minimalRepository = minimalRepository
         self.gitHubAPI = gitHubAPI
+        self.mockLiveServer = mockLiveServer
 
         super.init(nibName: nil, bundle: nil)
 
@@ -25,7 +29,7 @@ final class RepositoryViewController: UIViewController {
         super.viewDidLoad()
 
         let hostingViewController = UIHostingController(
-            rootView: RepositoryView(minimalRepository: minimalRepository, gitHubAPI: gitHubAPI)
+            rootView: RepositoryView(minimalRepository: minimalRepository, gitHubAPI: gitHubAPI, mockLiveServer: mockLiveServer)
         )
         addChild(hostingViewController)
         view.addSubview(hostingViewController.view)
@@ -44,8 +48,11 @@ final class RepositoryViewController: UIViewController {
 private struct RepositoryView: View {
     let minimalRepository: GitHubMinimalRepository
     let gitHubAPI: GitHubAPI
+    let mockLiveServer: MockLiveServer
 
     @State private var fullRepository: GitHubFullRepository?
+    @State private var liveStarCount: Int?
+    @State private var starCancellable: AnyCancellable?
 
     var body: some View {
         List {
@@ -67,7 +74,7 @@ private struct RepositoryView: View {
                 }
 
                 RepositoryValueView(key: "Stars") {
-                    Text("\(minimalRepository.stargazersCount)")
+                    Text("\(liveStarCount ?? minimalRepository.stargazersCount)")
                         .foregroundColor(.secondary)
                 }
 
@@ -86,6 +93,29 @@ private struct RepositoryView: View {
                 fullRepository = try await gitHubAPI.repository(minimalRepository.fullName)
             } catch {
                 print("Error loading full repository: \(error)")
+            }
+        }
+        .onAppear {
+            subscribeToLiveStars()
+        }
+        .onDisappear {
+            starCancellable?.cancel()
+        }
+    }
+    
+    private func subscribeToLiveStars() {
+        Task { @MainActor in
+            do {
+                starCancellable = try await mockLiveServer.subscribeToRepo(
+                    repoId: minimalRepository.id,
+                    currentStars: minimalRepository.stargazersCount
+                ) { updatedStars in
+                    DispatchQueue.main.async {
+                        self.liveStarCount = updatedStars
+                    }
+                }
+            } catch {
+                print("Failed to subscribe to live star updates: \(error)")
             }
         }
     }

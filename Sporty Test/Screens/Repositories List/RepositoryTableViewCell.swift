@@ -1,7 +1,11 @@
 import UIKit
+import Combine
 
 /// A cell displaying the basic information of a GitHub repository.
 final class RepositoryTableViewCell: UITableViewCell {
+    
+    var starCancellable: AnyCancellable?
+    
     /// The name of the repository.
     var name: String? {
         get {
@@ -126,5 +130,11 @@ final class RepositoryTableViewCell: UITableViewCell {
     @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        starCancellable?.cancel()
+        starCancellable = nil
     }
 }

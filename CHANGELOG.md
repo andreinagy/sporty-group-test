@@ -8,3 +8,8 @@ D: Implement deep links to a specific repo.
 - Tested the app being closed or another details being visible to illustrate an approach to a real task.
 - Moved URL parsing in `func organizationAndRepo(_ url: URL) -> (String, String)?` so it's testable.
 - AI Generated unit tests.
+
+G: Implement real-time updates of the star count using the provided `MockLiveServer`.
+- Added live uptates to the cell.
+- Added live updates to the repo details view.
+

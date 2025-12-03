@@ -41,7 +41,8 @@ final class AppCoordinator {
                 print(repository)
                 let viewController = RepositoryViewController(
                     minimalRepository: repository,
-                    gitHubAPI: gitHubAPI
+                    gitHubAPI: gitHubAPI,
+                    mockLiveServer: mockLiveServer
                 )
                 navigationController.popToRootViewController(animated: false)
                 navigationController.pushViewController(viewController, animated: true)

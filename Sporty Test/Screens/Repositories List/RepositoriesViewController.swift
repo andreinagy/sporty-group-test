@@ -52,6 +52,20 @@ final class RepositoriesViewController: UITableViewController {
         cell.descriptionText = repository.description
         cell.starCountText = repository.stargazersCount.formatted()
 
+        let repoId = repository.id
+        let currentStars = repository.stargazersCount
+        Task {
+            do {
+                cell.starCancellable = try await mockLiveServer.subscribeToRepo(repoId: repoId, currentStars: currentStars) { [weak cell] updatedStars in
+                    DispatchQueue.main.async {
+                        cell?.starCountText = updatedStars.formatted()
+                    }
+                }
+            } catch {
+                print("Failed to subscribe to repo \(repository.name): \(error)")
+            }
+        }
+        
         return cell
     }
 
@@ -59,7 +73,8 @@ final class RepositoriesViewController: UITableViewController {
         let repository = repositories[indexPath.row]
         let viewController = RepositoryViewController(
             minimalRepository: repository,
-            gitHubAPI: gitHubAPI
+            gitHubAPI: gitHubAPI,
+            mockLiveServer: mockLiveServer
         )
         show(viewController, sender: self)
     }
