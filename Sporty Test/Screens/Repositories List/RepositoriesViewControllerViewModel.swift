@@ -7,13 +7,13 @@ final class RepositoriesViewControllerViewModel {
     @Published var repositories: [GitHubMinimalRepository] = []
     @Published var isLoading = false
     @Published var error: Error?
-    @Published var organization: String = "swiftlang"
+    @Published var organization: String
 
-    private let gitHubAPI: GitHubAPI
+    private let gitHubAPI: GitHubAPIWrapper
     private let mockLiveServer: MockLiveServer
 
     init(
-        gitHubAPI: GitHubAPI,
+        gitHubAPI: GitHubAPIWrapper,
         mockLiveServer: MockLiveServer,
         organization: String = "swiftlang"
     ) {

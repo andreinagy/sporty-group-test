@@ -1,18 +1,17 @@
 import Combine
-import GitHubAPI
 import MockLiveServer
 import SwiftUI
 import UIKit
 
 /// A view controller that displays a list of GitHub repositories for the "swiftlang" organization.
 final class RepositoriesViewController: UITableViewController {
-    private let gitHubAPI: GitHubAPI
+    private let gitHubAPI: GitHubAPIWrapper
     private let mockLiveServer: MockLiveServer
     private let viewModel: RepositoriesViewControllerViewModel
     private var cancellables = Set<AnyCancellable>()
     private var headerView: RepositoriesHeaderView?
 
-    init(gitHubAPI: GitHubAPI, mockLiveServer: MockLiveServer) {
+    init(gitHubAPI: GitHubAPIWrapper, mockLiveServer: MockLiveServer) {
         self.gitHubAPI = gitHubAPI
         self.mockLiveServer = mockLiveServer
         self.viewModel = RepositoriesViewControllerViewModel(
@@ -155,5 +154,18 @@ final class RepositoriesViewController: UITableViewController {
         )
         alert.addAction(UIAlertAction(title: "OK", style: .default))
         present(alert, animated: true)
+    }
+    
+    @objc func showSettings() {
+        let githubTokenView = GithubTokenView(gitHubAPI: gitHubAPI)
+        let hostingController = UIHostingController(rootView: githubTokenView)
+        hostingController.modalPresentationStyle = .pageSheet
+        
+        if let sheet = hostingController.sheetPresentationController {
+            sheet.detents = [.medium(), .large()]
+            sheet.prefersGrabberVisible = true
+        }
+        
+        present(hostingController, animated: true)
     }
 }

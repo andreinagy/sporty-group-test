@@ -1,27 +1,38 @@
-import GitHubAPI
 import MockLiveServer
+import SwiftUI
 import UIKit
 
 @MainActor
 final class AppCoordinator {
     private let window: UIWindow
-    private let gitHubAPI: GitHubAPI
+    private let gitHubAPI: GitHubAPIWrapper
     private let mockLiveServer: MockLiveServer
     private let navigationController = UINavigationController()
 
     init(window: UIWindow) {
         self.window = window
-        gitHubAPI = GitHubAPI(authorisationToken: nil)
+        gitHubAPI = GitHubAPIWrapper()
         mockLiveServer = MockLiveServer()
     }
 
     func start() {
-        navigationController.viewControllers = [
-            RepositoriesViewController(
-                gitHubAPI: gitHubAPI,
-                mockLiveServer: mockLiveServer
-            )
-        ]
+        let repositoriesViewController = RepositoriesViewController(
+            gitHubAPI: gitHubAPI,
+            mockLiveServer: mockLiveServer,
+        )
+        
+        // Add settings button
+        let settingsButton = UIBarButtonItem(
+            image: UIImage(systemName: "gear"),
+            style: .plain,
+            target: nil,
+            action: nil
+        )
+        settingsButton.action = #selector(repositoriesViewController.showSettings)
+        settingsButton.target = repositoriesViewController
+        repositoriesViewController.navigationItem.rightBarButtonItem = settingsButton
+        
+        navigationController.viewControllers = [repositoriesViewController]
         window.rootViewController = navigationController
         window.makeKeyAndVisible()
     }

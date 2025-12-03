@@ -7,10 +7,10 @@ import MockLiveServer
 /// A view controller that displays the details of a GitHub repository.
 final class RepositoryViewController: UIViewController {
     private let minimalRepository: GitHubMinimalRepository
-    private let gitHubAPI: GitHubAPI
+    private let gitHubAPI: GitHubAPIWrapper
     private let mockLiveServer: MockLiveServer
 
-    init(minimalRepository: GitHubMinimalRepository, gitHubAPI: GitHubAPI, mockLiveServer: MockLiveServer) {
+    init(minimalRepository: GitHubMinimalRepository, gitHubAPI: GitHubAPIWrapper, mockLiveServer: MockLiveServer) {
         self.minimalRepository = minimalRepository
         self.gitHubAPI = gitHubAPI
         self.mockLiveServer = mockLiveServer
@@ -47,7 +47,7 @@ final class RepositoryViewController: UIViewController {
 /// A view displaying the details of a GitHub repository.
 private struct RepositoryView: View {
     let minimalRepository: GitHubMinimalRepository
-    let gitHubAPI: GitHubAPI
+    let gitHubAPI: GitHubAPIWrapper
     let mockLiveServer: MockLiveServer
 
     @State private var fullRepository: GitHubFullRepository?
