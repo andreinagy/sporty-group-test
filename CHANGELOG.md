@@ -23,10 +23,11 @@ B: Add UI to request the repos for a different user.
 - After testing, added an alert for errors and a red border on the organization textInput, so there is some UI feedback, and I didn't insist more on handling errors (eg. selective error for organization without repos).
 
 A: Add UI to store the authorisation token used to access the GitHub API.
-- Copilot generated View and Keychain wrapper. Removed singleton and adapted to have dependency injection.
+- Copilot generated View and Keychain wrapper, manually adapted and improved.
 - Added GithubAPIWrapper. I suppose this is a 3rd party library which I can't edit and we need to work around it's limitations until they provide a fixed version.
-    - The working assumption is that there is no issue with using the GithubAPI models.
-- GithubAPIWrapper and KeychainWrapper could be absttracted wtih protocols if it would be useful to unit test code relying on them.
+    - The working assumption is that there is no issue with using the GithubAPI models, if it were a problematic dependency I would consider mapping it's objects to apps models.
+- GithubAPIWrapper and KeychainWrapper could be absttracted furthere behind protocols if it would be useful to unit test code relying on them.
+- I considered implementing some dependency injection and a UI builder to move out the initialization code from `RepositoriesViewController`, but it didn't seem valuable for the test.
 
 F: Modify `RepositoryTableViewCell` to modify its layout when the title and star count cannot fit on a single line.
 - I think the purpose of the test is more than just allow multiple lines in the title label, in real projects I would advise against doing conditional layout because of aestetic integrity.
