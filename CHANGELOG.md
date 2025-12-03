@@ -2,3 +2,9 @@
 
 E: Implement pull-to-refresh.
 - Classical implementation of pull to refresh.
+
+D: Implement deep links to a specific repo.
+- Implemented deep links such as `sportytest://repo/swiftlang/swift`
+- Tested the app being closed or another details being visible to illustrate an approach to a real task.
+- Moved URL parsing in `func organizationAndRepo(_ url: URL) -> (String, String)?` so it's testable.
+- AI Generated unit tests.

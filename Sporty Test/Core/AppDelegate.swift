@@ -19,5 +19,20 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
             sessionRole: connectingSceneSession.role
         )
     }
+    
+    func application(
+        _ app: UIApplication,
+        open url: URL,
+        options: [UIApplication.OpenURLOptionsKey: Any] = [:]
+    ) -> Bool {
+        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+              let window = windowScene.windows.first,
+              let rootNav = window.rootViewController as? UINavigationController,
+              let _ = rootNav.viewControllers.first as? RepositoriesViewController else {
+            return false
+        }
+        
+        return true
+    }
 }
 
